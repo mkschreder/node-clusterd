@@ -1,4 +1,4 @@
-var cn = require("./server"); 
+var cn = require(__dirname+"/server"); 
 var fs = require("fs"); 
 var cluster = require("cluster"); 
 

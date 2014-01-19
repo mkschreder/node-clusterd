@@ -11,12 +11,13 @@
   },
   "scripts": {
 		"start": "bash ./clusterd",
-		"postdeploy": "bash genkeys.sh"
+		"install": "bash genkeys.sh"
 	},
   "dependencies": {
     "JSON": "*",
     "q": "*",
-    "async": "*"
+    "async": "*",
+    "cluster": "*"
   },
   "repository": {
     "type": "git",
