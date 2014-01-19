@@ -92,6 +92,7 @@ var os = require("os");
 					work.item = data.work; 
 					prog(work, s); 
 				} catch(e){
+					work.reject("Could not compile program!");
 					console.error(e); 
 				}
 			}); 

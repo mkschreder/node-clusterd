@@ -11,10 +11,18 @@ if (cluster.isMaster) {
 		cluster.fork();
 	});
 } else {
-  cn.node({
-		key:    fs.readFileSync('keys/server.key').toString(),
-		cert:   fs.readFileSync('keys/server.crt').toString(),
-		ca:     fs.readFileSync('keys/ca.crt').toString(),
-	}).listen();
+	var config = "{}"; 
+	try {
+		config = JSON.parse(fs.readFileSync("config.json").toString()); 
+		console.log("Using config.json"); 
+	} catch(e){
+		config = {
+			key:    fs.readFileSync('keys/server.key').toString(),
+			cert:   fs.readFileSync('keys/server.crt').toString(),
+			ca:     fs.readFileSync('keys/ca.crt').toString(),
+		}; 
+		console.log("Using default config!"); 
+	}
+  cn.node(config).listen();
 }
 
