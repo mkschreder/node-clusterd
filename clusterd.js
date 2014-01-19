@@ -21,7 +21,7 @@ if (cluster.isMaster) {
 			cert:   fs.readFileSync('keys/server.crt').toString(),
 			ca:     fs.readFileSync('keys/ca.crt').toString(),
 		}; 
-		console.log("Using default config!"); 
+		console.log("Using default config (config.json file not found)!"); 
 	}
   cn.node(config).listen();
 }
