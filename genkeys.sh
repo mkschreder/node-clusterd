@@ -2,8 +2,9 @@ DIR="$(dirname "$(readlink -f "$0")")"
 cd $DIR
 
 echo "======== GENERATING SERVER CERTIFFICATE ========"
+echo $PWD
 if [ ! -d keys ]; then mkdir keys; fi
-if [ ! -f keys/server.key ]; then
+if [ ! -e keys/server.key ]; then
 	openssl genrsa -out keys/server.key 1024
 	openssl rsa -in keys/server.key -out keys/server.key.out
 	mv keys/server.key.out keys/server.key
@@ -18,3 +19,4 @@ if [ ! -f keys/server.key ]; then
 	# this cluster node!"
 	echo "################################################"
 fi
+echo "================================================"
