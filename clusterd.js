@@ -11,17 +11,19 @@ if (cluster.isMaster) {
 		cluster.fork();
 	});
 } else {
-	var config = "{}"; 
+	var config = {
+		key:    fs.readFileSync('keys/server.key').toString(),
+		cert:   fs.readFileSync('keys/server.crt').toString(),
+		ca:     fs.readFileSync('keys/ca.crt').toString(),
+	};
 	try {
-		config = JSON.parse(fs.readFileSync("config.json").toString()); 
-		console.log("Using config.json"); 
+		var obj = JSON.parse(fs.readFileSync("config.json").toString()); 
+		Object.keys(obj).map(function(x){
+			config[x] = obj[x]; 
+		}); 
+		console.log("Using extra fields imported from config.json!"); 
 	} catch(e){
-		config = {
-			key:    fs.readFileSync('keys/server.key').toString(),
-			cert:   fs.readFileSync('keys/server.crt').toString(),
-			ca:     fs.readFileSync('keys/ca.crt').toString(),
-		}; 
-		console.log("Using default config (config.json file not found)!"); 
+		console.log("Using default config (could not load config.json): "+e); 
 	}
   cn.node(config).listen();
 }
