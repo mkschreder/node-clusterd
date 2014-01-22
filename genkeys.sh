@@ -1,5 +1,5 @@
 DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
-cd $DIR
+(cd $DIR
 
 echo "======== GENERATING SERVER CERTIFFICATE ========"
 echo $PWD
@@ -19,4 +19,4 @@ if [ ! -e $PWD/keys/server.key ]; then
 	# this cluster node!"
 	echo "################################################"
 fi
-echo "================================================"
+echo "================================================")

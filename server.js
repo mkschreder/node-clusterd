@@ -82,7 +82,8 @@ var os = require("os");
 			var dom = domain.create(); 
 			
 			dom.on("error", function(e){
-				work.reject(e.toString()); 
+				work.reject({error: true, data: e.stack}); 
+				//throw Error(e);
 			}); 
 			
 			dom.run(function(){
@@ -92,7 +93,7 @@ var os = require("os");
 					work.item = data.work; 
 					prog(work, s); 
 				} catch(e){
-					work.reject("Could not compile program!");
+					throw Error("Could not run program: "+e);
 					console.error(e); 
 				}
 			}); 
@@ -103,8 +104,9 @@ var os = require("os");
 	
 	Server.prototype.listen = function(port){
 		var self = this; 
+		var ret = Q.defer(); 
 		
-		this._server = tls.createServer(this.options, function(s) {
+		var server = tls.createServer(this.options, function(s) {
 			var dom = domain.create(); 
 			dom.on("error", function(e){
 				console.log("SERVER ERROR: "+e); 
@@ -140,16 +142,25 @@ var os = require("os");
 										s.end();  
 									}); 
 								} else {
-									var work = exec(data, self);
-									s.work = work; 
-									work.progress(function(data){
-										s.write(JSON.stringify({progress: true, data: data})+"\n"); 
-									}).done(function accept(data){
-										s.write(JSON.stringify({success: true, data: data})+"\n"); 
+									try{
+										var work = exec(data, self);
+										s.work = work; 
+										work.progress(function(data){
+											s.write(JSON.stringify({progress: true, data: data})+"\n"); 
+										}).done(function accept(data){
+											s.write(JSON.stringify({success: true, data: data})+"\n"); 
+											s.end(); 
+										}, function reject(err){
+											if(typeof err == "object" && err.error == true)
+												s.write(JSON.stringify({error: true, data: err.data})+"\n"); 
+											else 
+												s.write(JSON.stringify({reject: true, data: err})+"\n"); 
+											s.end(); 
+										}); 
+									} catch(e){
+										s.write(JSON.stringify({error: true, data: e})+"\n"); 
 										s.end(); 
-									}, function reject(err){
-										s.write(JSON.stringify({error: true, data: err})+"\n"); 
-									}); 
+									}
 								}
 							} catch(e){
 								console.error("ERROR: Server::on(data): "+e); 
@@ -164,8 +175,17 @@ var os = require("os");
 				}
 				//s.pipe(s);
 			}); 
-		}).listen(port||DEFAULT_PORT);
-		return this; 
+		});
+		server.on("error", function(){
+			ret.reject(); 
+		}); 
+		self.options.port = parseInt(port||self.options.port||DEFAULT_PORT); 
+		server.listen(self.options.port, function(){
+			ret.resolve();
+		});
+		this._server = server; 
+		
+		return ret.promise; 
 	}
 	
 	exports.node = function(opts){
